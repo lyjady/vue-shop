@@ -9,11 +9,11 @@
       <el-form class="login-form" ref="loginForm" :rules="rules" :model="loginForm" label-width="0px">
         <!-- 用户名 -->
         <el-form-item>
-          <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"/>
+          <el-input v-model="loginForm.mgName" prefix-icon="iconfont icon-user"/>
         </el-form-item>
         <!-- 密码 -->
-        <el-form-item prop="password">
-          <el-input v-model="loginForm.password" type="password" prefix-icon="iconfont icon-3702mima"/>
+        <el-form-item>
+          <el-input v-model="loginForm.mgPwd" type="password" prefix-icon="iconfont icon-3702mima"/>
         </el-form-item>
         <!-- 按钮 -->
         <el-form class="login-btn">
@@ -31,8 +31,8 @@ export default {
   data () {
     return {
       loginForm: {
-        username: '',
-        password: ''
+        mgName: '',
+        mgPwd: ''
       },
       rules: {
         password: [
@@ -50,7 +50,7 @@ export default {
       this.$refs.loginForm.validate(result => {
         if (result) {
           this.$http({
-            url: 'http://127.0.0.1:8011/login',
+            url: 'login',
             method: 'post',
             data: this.loginForm,
             headers: {

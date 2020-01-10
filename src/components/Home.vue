@@ -9,40 +9,16 @@
       </el-header>
       <el-container>
         <el-aside width="200px">
-          <el-menu style="width: 200px" class="el-menu-vertical-demo" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
-            <el-submenu index="1">
+          <el-menu style="width: 200px" class="el-menu-vertical-demo" background-color="#333744" text-color="#fff" active-text-color="#409EFF">
+            <el-submenu :index="menu.psId + ''" v-for="menu in menuList" :key="menu.psId">
               <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航一</span>
+                <i :class="iconObj[menu.psId]"></i>
+                <span>{{ menu.psName }}</span>
               </template>
-              <el-menu-item index="1-1">
+              <el-menu-item :index="item.psId + ''" v-for="item in menu.subMenuList" :key="item.psId">
                 <template>
-                  <i class="el-icon-location"></i>
-                  <span>导航一</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="1-2">
-                <template>
-                  <i class="el-icon-location"></i>
-                  <span>导航一</span>
-                </template>
-              </el-menu-item>
-            </el-submenu>
-            <el-submenu index="2">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>导航一</span>
-              </template>
-              <el-menu-item index="2-1">
-                <template>
-                  <i class="el-icon-location"></i>
-                  <span>导航一</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="2-2">
-                <template>
-                  <i class="el-icon-location"></i>
-                  <span>导航一</span>
+                  <i class="el-icon-menu"></i>
+                  <span>{{ item.psName }}</span>
                 </template>
               </el-menu-item>
             </el-submenu>
@@ -56,11 +32,34 @@
 <script>
 export default {
   name: '',
+  data () {
+    return {
+      menuList: [],
+      iconObj: {
+        '125': 'iconfont icon-user',
+        '103': 'iconfont icon-tijikongjian',
+        '101': 'iconfont icon-shangpin',
+        '102': 'iconfont icon-danju',
+        '145': 'iconfont icon-baobiao'
+      }
+    }
+  },
   methods: {
     logout () {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    getMenuList () {
+      this.$http.get('getMenuList').then(response => {
+        if (response.status === 200) {
+          this.menuList = response.data.data
+        }
+        console.log(this.menuList.subMenuList)
+      })
     }
+  },
+  created () {
+    this.getMenuList()
   }
 }
 </script>
@@ -90,5 +89,9 @@ export default {
 
   .el-main {
     background-color: #EAEDF1;
+  }
+
+  .iconfont {
+    margin-right: 10px;
   }
 </style>
