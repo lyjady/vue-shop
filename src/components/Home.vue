@@ -1,32 +1,37 @@
 <template>
-    <el-container class="home-container">
-      <el-header>
-        <div class="header-left">
-          <img src="../assets/heima.png">
-          <span>电商后台管理系统</span>
-        </div>
-        <el-button type="info" round @click="logout">退出</el-button>
-      </el-header>
-      <el-container>
-        <el-aside width="200px">
-          <el-menu style="width: 200px" class="el-menu-vertical-demo" background-color="#333744" text-color="#fff" active-text-color="#409EFF">
-            <el-submenu :index="menu.psId + ''" v-for="menu in menuList" :key="menu.psId">
-              <template slot="title">
-                <i :class="iconObj[menu.psId]"></i>
-                <span>{{ menu.psName }}</span>
+  <el-container class="home-container">
+    <el-header>
+      <div class="header-left">
+        <img src="../assets/heima.png">
+        <span>电商后台管理系统</span>
+      </div>
+      <el-button type="info" round @click="logout">退出</el-button>
+    </el-header>
+    <el-container>
+      <el-aside :width="isFold ? '64px' : '200px'">
+        <div class="fold" @click="toggleAside">|||</div>
+        <el-menu :class="[isFold ? 'afold' : 'bfold']" class="el-menu-vertical-demo" background-color="#333744"
+                 text-color="#fff" active-text-color="#409EFF" router :collapse="isFold" :collapse-transition="false">
+          <el-submenu :index="menu.psId + ''" v-for="menu in menuList" :key="menu.psId">
+            <template slot="title">
+              <i :class="iconObj[menu.psId]"></i>
+              <span>{{ menu.psName }}</span>
+            </template>
+            <el-menu-item :index="'/' + item.permissionApi.psApiPath + ''" v-for="item in menu.subMenuList"
+                          :key="item.psId">
+              <template>
+                <i class="el-icon-menu"></i>
+                <span>{{ item.psName }}</span>
               </template>
-              <el-menu-item :index="item.psId + ''" v-for="item in menu.subMenuList" :key="item.psId">
-                <template>
-                  <i class="el-icon-menu"></i>
-                  <span>{{ item.psName }}</span>
-                </template>
-              </el-menu-item>
-            </el-submenu>
-          </el-menu>
-        </el-aside>
-        <el-main>Main</el-main>
-      </el-container>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-aside>
+      <el-main>
+        <router-view/>
+      </el-main>
     </el-container>
+  </el-container>
 </template>
 
 <script>
@@ -41,6 +46,11 @@ export default {
         '101': 'iconfont icon-shangpin',
         '102': 'iconfont icon-danju',
         '145': 'iconfont icon-baobiao'
+      },
+      isFold: false,
+      classObj: {
+        afold: true,
+        bfold: true
       }
     }
   },
@@ -50,12 +60,14 @@ export default {
       this.$router.push('/login')
     },
     getMenuList () {
-      this.$http.get('getMenuList').then(response => {
+      this.$http.get('permission/getMenuList').then(response => {
         if (response.status === 200) {
           this.menuList = response.data.data
         }
-        console.log(this.menuList.subMenuList)
       })
+    },
+    toggleAside () {
+      this.isFold = !this.isFold
     }
   },
   created () {
@@ -85,6 +97,7 @@ export default {
 
   .el-aside {
     background-color: #333744;
+    overflow-x: hidden;
   }
 
   .el-main {
@@ -93,5 +106,27 @@ export default {
 
   .iconfont {
     margin-right: 10px;
+  }
+
+  .fold {
+    text-align: center;
+    background-color: #4A5064;
+    font-size: 10px;
+    line-height: 24px;
+    color: #ffffff;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+  }
+
+  .afold {
+    width: 64px;
+  }
+
+  .bfold {
+    width: 200px;
+  }
+
+  .el-menu {
+    overflow-x: hidden;
   }
 </style>

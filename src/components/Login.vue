@@ -50,7 +50,7 @@ export default {
       this.$refs.loginForm.validate(result => {
         if (result) {
           this.$http({
-            url: 'login',
+            url: 'user/login',
             method: 'post',
             data: this.loginForm,
             headers: {
