@@ -8,7 +8,30 @@ import { Form } from 'element-ui'
 // eslint-disable-next-line no-unused-vars,import/no-duplicates
 import { Input } from 'element-ui'
 // eslint-disable-next-line import/no-duplicates
-import { Message, Container, Aside, Main, Header, Menu, Submenu, MenuItem } from 'element-ui'
+import {
+  Message,
+  Container,
+  Aside,
+  Main,
+  Header,
+  Menu,
+  Submenu,
+  MenuItem,
+  Breadcrumb,
+  BreadcrumbItem,
+  Card,
+  Row,
+  Col,
+  Table,
+  TableColumn,
+  Switch,
+  Tooltip,
+  Loading,
+  Pagination,
+  Dialog,
+  MessageBox
+// eslint-disable-next-line import/no-duplicates
+} from 'element-ui'
 
 Vue.use(Button)
 Vue.use(FormItem)
@@ -21,4 +44,17 @@ Vue.use(Header)
 Vue.use(Menu)
 Vue.use(Submenu)
 Vue.use(MenuItem)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Row)
+Vue.use(Col)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
+Vue.use(Tooltip)
+Vue.use(Loading)
+Vue.use(Pagination)
+Vue.use(Dialog)
 Vue.prototype.$message = Message
+Vue.prototype.$confirm = MessageBox.confirm

@@ -51,7 +51,7 @@ export default {
         if (result) {
           this.$http({
             url: 'user/login',
-            method: 'post',
+            method: 'POST',
             data: this.loginForm,
             headers: {
               'Content-Type': 'application/json'
