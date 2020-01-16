@@ -269,17 +269,6 @@ export default {
 }
 </script>
 
-<style scoped>
-  .box-card {
-    margin-top: 20px;
-  }
+<style>
 
-  .el-table {
-    margin-top: 20px;
-  }
-
-  .el-pagination {
-    margin-top: 20px;
-    text-align: center;
-  }
 </style>
