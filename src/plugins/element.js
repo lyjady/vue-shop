@@ -29,7 +29,9 @@ import {
   Loading,
   Pagination,
   Dialog,
-  MessageBox
+  MessageBox,
+  Tag,
+  Tree
 // eslint-disable-next-line import/no-duplicates
 } from 'element-ui'
 
@@ -56,5 +58,7 @@ Vue.use(Tooltip)
 Vue.use(Loading)
 Vue.use(Pagination)
 Vue.use(Dialog)
+Vue.use(Tag)
+Vue.use(Tree)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
