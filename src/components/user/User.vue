@@ -35,8 +35,8 @@
             <template v-slot="scope">
               <el-button type="primary" icon="el-icon-edit" size="mini" @click="openEditUserForm(scope.row.mgId)"/>
               <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row.mgId)"/>
-              <el-tooltip class="item" effect="dark" content="分配权限" placement="top" :enterable="false">
-                <el-button type="warning" icon="el-icon-setting" size="mini"/>
+              <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
+                <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRoleInfo(scope.row)"/>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -80,6 +80,17 @@
         <span slot="footer" class="dialog-footer">
           <el-button @click="cancelEdit">取 消</el-button>
           <el-button type="primary" @click="editUser">确 定</el-button>
+        </span>
+      </el-dialog>
+      <el-dialog title="分配角色" width="10%" :visible.sync="distributionRole">
+        <p>当前用户: {{ userInfo.mgName }}</p>
+        <p>当前角色: {{ userInfo.roleName }}</p>
+        <el-select v-model="value" clearable placeholder="请选择">
+          <el-option v-for="role in roleList" :label="role.roleName" :value="role.roleId" :key="role.roleId"/>
+        </el-select>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="distributionRole = false">取 消</el-button>
+          <el-button type="primary" @click="distributionRole = false">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -149,7 +160,11 @@ export default {
           { required: true, message: '请输入电话', trigger: 'blur' },
           { validator: checkMobile, trigger: 'blur' }
         ]
-      }
+      },
+      distributionRole: false,
+      userInfo: {},
+      roleList: [],
+      value: ''
     }
   },
   methods: {
@@ -260,6 +275,15 @@ export default {
         }
       } else if (confirmResult === 'cancel') {
         return this.$message.info('取消删除用户')
+      }
+    },
+    async setRoleInfo (role) {
+      this.distributionRole = true
+      this.userInfo = role
+      this.userInfo.roleName = this.userInfo.role.roleName
+      const { data: response } = await this.$http.get('role/getRoleList')
+      if (response.status === 200) {
+        this.roleList = response.data
       }
     }
   },

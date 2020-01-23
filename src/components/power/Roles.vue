@@ -52,10 +52,10 @@
       </el-table>
     </el-card>
     <el-dialog title="分配权限" :visible.sync="distributionRightDialog">
-      <el-tree :data="treePermissionList" show-checkbox node-key="psId" :props="defaultProps" default-expand-all :default-checked-keys="expandedKey"/>
+      <el-tree ref="treeRef" :data="treePermissionList" show-checkbox node-key="psId" :props="defaultProps" default-expand-all :default-checked-keys="expandedKey"/>
       <span slot="footer" class="dialog-footer">
         <el-button @click="distributionRightDialog = false">取 消</el-button>
-        <el-button type="primary" @click="distributionRightDialog = false">确 定</el-button>
+        <el-button type="primary" @click="distributionRights">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -73,7 +73,8 @@ export default {
         label: 'psName'
       },
       treePermissionList: [],
-      expandedKey: []
+      expandedKey: [],
+      currentRoleId: 0
     }
   },
   methods: {
@@ -98,6 +99,7 @@ export default {
       }
     },
     async distributionRight (roleId) {
+      this.currentRoleId = roleId
       this.distributionRightDialog = true
       this.expandedKey = []
       const { data: response } = await this.$http.get('permission/getTreePermissionList')
@@ -115,6 +117,20 @@ export default {
           }
         })
       }
+    },
+    async distributionRights () {
+      let keys = [
+        ...this.$refs.treeRef.getHalfCheckedKeys(),
+        ...this.$refs.treeRef.getCheckedKeys()
+      ]
+      let idStr = keys.join(',')
+      const { data: response } = await this.$http.post('role/distributionRight/' + this.currentRoleId + '/' + idStr)
+      if (response === 1) {
+        this.$message.success('添加权限成功')
+      } else {
+        this.$message.error('添加权限失败')
+      }
+      this.distributionRightDialog = false
     }
   },
   created () {
