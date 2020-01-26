@@ -82,15 +82,16 @@
           <el-button type="primary" @click="editUser">确 定</el-button>
         </span>
       </el-dialog>
-      <el-dialog title="分配角色" width="10%" :visible.sync="distributionRole">
+      <el-dialog title="分配角色" width="20%" :visible.sync="distributionRole">
         <p>当前用户: {{ userInfo.mgName }}</p>
         <p>当前角色: {{ userInfo.roleName }}</p>
-        <el-select v-model="value" clearable placeholder="请选择">
+        分配角色:
+        <el-select v-model="updateRoleId" clearable placeholder="请选择">
           <el-option v-for="role in roleList" :label="role.roleName" :value="role.roleId" :key="role.roleId"/>
         </el-select>
         <span slot="footer" class="dialog-footer">
           <el-button @click="distributionRole = false">取 消</el-button>
-          <el-button type="primary" @click="distributionRole = false">确 定</el-button>
+          <el-button type="primary" @click="updateRole">确 定</el-button>
         </span>
       </el-dialog>
     </div>
@@ -164,7 +165,7 @@ export default {
       distributionRole: false,
       userInfo: {},
       roleList: [],
-      value: ''
+      updateRoleId: ''
     }
   },
   methods: {
@@ -285,6 +286,27 @@ export default {
       if (response.status === 200) {
         this.roleList = response.data
       }
+    },
+    async updateRole () {
+      const { data: response } = await this.$http.post('role/updateRole/' + this.userInfo.mgId + '/' + this.updateRoleId)
+      if (response.status === 200) {
+        this.roleList.forEach(role => {
+          if (role.roleId === this.updateRoleId) {
+            this.userList.forEach(user => {
+              if (user.mgId === this.userInfo.mgId) {
+                user.roleName = role.roleName
+                user.role.roleName = role.roleName
+              }
+            })
+          }
+        })
+        this.$message.success('分配角色成功')
+      } else {
+        this.$message.error('分配角色失败')
+      }
+      this.userInfo = {}
+      this.updateRoleId = ''
+      this.distributionRole = false
     }
   },
   created () {
