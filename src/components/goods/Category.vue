@@ -6,7 +6,7 @@
       <el-breadcrumb-item>商品分类</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card class="box-card" v-loading="loading">
-      <el-button type="primary" round>添加分类</el-button>
+      <el-button type="primary" round @click="addGoodsCategory">添加分类</el-button>
       <zk-table :data="categoryList" :columns="columns" :selection-type="false" :expand-type="false" border
                 index-text="#" :show-index="true" :show-row-hover="false">
         <template v-slot:isDeleted="scope">
@@ -29,6 +29,20 @@
                      :current-page="queryInfo.pageNumber" :page-sizes="[3, 5, 10, 15]" :page-size="queryInfo.pageSize"
                      :total="total" layout="total, sizes, prev, pager, next, jumper" background/>
     </el-card>
+    <el-dialog title="添加分类" :visible.sync="enableAddCategoryDialog">
+      <el-form ref="addCategoryRef" :rules="addCategoryRule" :model="addCategory" size="medium">
+        <el-form-item label="分类名称:" prop="catName">
+          <el-input v-model="addCategory.catName"/>
+        </el-form-item>
+        <el-form-item label="父分类:">
+          <el-cascader style="width: 100%" :options="categoryWithoutThird" :props="categoryCascader" @change="categoryChange" clearable separator=" > " v-model="selectKey"></el-cascader>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="enableAddCategoryDialog = false">取 消</el-button>
+        <el-button type="primary" @click="commitAddCategory">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -66,7 +80,27 @@ export default {
           template: 'option'
         }
       ],
-      loading: true
+      loading: true,
+      enableAddCategoryDialog: false,
+      addCategoryRule: {
+        catName: [
+          { required: true, message: '请输入分类名', trigger: 'blur' }
+        ]
+      },
+      addCategory: {
+        catName: '',
+        catPid: 0,
+        catLevel: 0
+      },
+      categoryWithoutThird: [],
+      categoryCascader: {
+        value: 'catId',
+        label: 'catName',
+        children: 'child',
+        expandTrigger: 'hover',
+        checkStrictly: true
+      },
+      selectKey: []
     }
   },
   created () {
@@ -100,6 +134,34 @@ export default {
     handleChangePageNumber (newNumber) {
       this.queryInfo.pageNumber = newNumber
       this.getCategory()
+    },
+    async addGoodsCategory () {
+      const { data: response } = await this.$http({
+        url: 'goods/getGoodsCategoryTree',
+        method: 'post',
+        data: {
+          pageNumber: null,
+          pageSize: null
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      this.categoryWithoutThird = response.data
+      this.categoryWithoutThird.forEach(first => {
+        first.child = first.children
+      })
+      this.enableAddCategoryDialog = true
+    },
+    commitAddCategory () {
+      console.log(this.addCategory)
+      this.enableAddCategoryDialog = false
+    },
+    categoryChange () {
+      if (this.selectKey.length > 0) {
+        this.addCategory.catPid = this.selectKey[this.selectKey.length - 1]
+        this.addCategory.catLevel = this.selectKey.length
+      }
     }
   }
 }
