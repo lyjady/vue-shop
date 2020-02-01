@@ -29,7 +29,7 @@
                      :current-page="queryInfo.pageNumber" :page-sizes="[3, 5, 10, 15]" :page-size="queryInfo.pageSize"
                      :total="total" layout="total, sizes, prev, pager, next, jumper" background/>
     </el-card>
-    <el-dialog title="添加分类" :visible.sync="enableAddCategoryDialog">
+    <el-dialog title="添加分类" :visible.sync="enableAddCategoryDialog" @close="closeAddCategory">
       <el-form ref="addCategoryRef" :rules="addCategoryRule" :model="addCategory" size="medium">
         <el-form-item label="分类名称:" prop="catName">
           <el-input v-model="addCategory.catName"/>
@@ -154,14 +154,35 @@ export default {
       this.enableAddCategoryDialog = true
     },
     commitAddCategory () {
-      console.log(this.addCategory)
-      this.enableAddCategoryDialog = false
+      this.$refs.addCategoryRef.validate(async validate => {
+        if (validate) {
+          const { data: response } = await this.$http({
+            url: 'goods/addCategory',
+            method: 'post',
+            data: this.addCategory,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          if (response.status === 200) {
+            this.enableAddCategoryDialog = false
+            this.getCategory()
+          }
+        }
+      })
     },
     categoryChange () {
       if (this.selectKey.length > 0) {
         this.addCategory.catPid = this.selectKey[this.selectKey.length - 1]
         this.addCategory.catLevel = this.selectKey.length
       }
+    },
+    closeAddCategory () {
+      this.$refs.addCategoryRef.resetFields()
+      this.selectKey = []
+      this.addCategory.catName = ''
+      this.addCategory.catPid = 0
+      this.addCategory.catLevel = 0
     }
   }
 }
