@@ -35,7 +35,9 @@ import {
   Select,
   Option,
   Cascader,
-  Alert
+  Alert,
+  Tabs,
+  TabPane
 // eslint-disable-next-line import/no-duplicates
 } from 'element-ui'
 
@@ -68,5 +70,7 @@ Vue.use(Select)
 Vue.use(Option)
 Vue.use(Cascader)
 Vue.use(Alert)
+Vue.use(Tabs)
+Vue.use(TabPane)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
