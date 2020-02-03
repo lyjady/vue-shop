@@ -12,11 +12,33 @@
           <el-cascader :options="cateList" clearable separator=" > " :props="cateProps" v-model="selectedCateKey" @change="handleCateChange"/>
         </div>
         <el-tabs v-model="activeName" @tab-click="handleTabsClick">
-          <el-tab-pane label="动态参数" name="dynamicParams">
+          <el-tab-pane label="动态参数" name="many">
             <el-button type="primary" round :disabled="isEnableAddParamsBtn">添加参数</el-button>
+            <el-table :data="dynamicData" border stripe v-loading="loading">
+              <el-table-column type="expand"/>
+              <el-table-column type="index" label="#"/>
+              <el-table-column label="参数名称" prop="attrName"/>
+              <el-table-column label="操作">
+                <template>
+                  <el-button type="warning" icon="el-icon-edit" round>编辑</el-button>
+                  <el-button type="danger" icon="el-icon-delete" round>删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
           </el-tab-pane>
-          <el-tab-pane label="静态属性" name="staticAttribute">
+          <el-tab-pane label="静态属性" name="only">
             <el-button type="primary" round :disabled="isEnableAddParamsBtn">添加参数</el-button>
+            <el-table :data="staticData" border stripe v-loading="loading">
+              <el-table-column type="expand"/>
+              <el-table-column type="index" label="#"/>
+              <el-table-column label="参数名称" prop="attrName"/>
+              <el-table-column label="操作">
+                <template>
+                  <el-button type="warning" icon="el-icon-edit" round>编辑</el-button>
+                  <el-button type="danger" icon="el-icon-delete" round>删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
           </el-tab-pane>
         </el-tabs>
       </el-card>
@@ -40,7 +62,10 @@ export default {
         expandTrigger: 'hover'
       },
       selectedCateKey: [],
-      activeName: 'dynamicParams'
+      activeName: 'many',
+      dynamicData: [],
+      staticData: [],
+      loading: false
     }
   },
   methods: {
@@ -61,10 +86,26 @@ export default {
       }
     },
     handleCateChange () {
-      console.log(this.selectedCateKey)
+      if (this.selectedCateKey.length === 3) {
+        this.getGoodsAttribute()
+      }
     },
     handleTabsClick (tab, event) {
-      console.log(this.activeName)
+      if (this.selectedCateKey.length === 3) {
+        this.getGoodsAttribute()
+      }
+    },
+    async getGoodsAttribute () {
+      this.loading = true
+      const { data: response } = await this.$http.get('goods/findGoodsAttribute/' + this.selectedCateKey[2], { params: { type: this.activeName } })
+      if (response.status === 200) {
+        this.loading = false
+        if (this.activeName === 'many') {
+          this.dynamicData = response.data
+        } else {
+          this.staticData = response.data
+        }
+      }
     }
   },
   created () {
