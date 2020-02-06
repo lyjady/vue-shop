@@ -15,13 +15,21 @@
           <el-tab-pane label="动态参数" name="many">
             <el-button type="primary" round :disabled="isEnableAddParamsBtn" @click="enableUpdateDialog = true">添加参数</el-button>
             <el-table :data="dynamicData" border stripe v-loading="loading">
-              <el-table-column type="expand"/>
+              <el-table-column type="expand">
+                <template v-slot="scope">
+                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
+                    {{ tag }}
+                  </el-tag>
+                  <el-input style="height: 30px" class="input-new-tag" size="small" v-if="inputVisible" v-model="inputValue" @key.enter.native="addVals" @blur="addVals"/>
+                  <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ New Tag</el-button>
+                </template>
+              </el-table-column>
               <el-table-column type="index" label="#"/>
               <el-table-column label="参数名称" prop="attrName"/>
               <el-table-column label="操作">
                 <template v-slot="scope">
                   <el-button type="warning" icon="el-icon-edit" round @click="edit(scope.row)">编辑</el-button>
-                  <el-button type="danger" icon="el-icon-delete" round>删除</el-button>
+                  <el-button type="danger" icon="el-icon-delete" round @click="removeAttribute(scope.row)">删除</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -29,13 +37,21 @@
           <el-tab-pane label="静态属性" name="only">
             <el-button type="primary" round :disabled="isEnableAddParamsBtn" @click="enableUpdateDialog = true">添加参数</el-button>
             <el-table :data="staticData" border stripe v-loading="loading">
-              <el-table-column type="expand"/>
+              <el-table-column type="expand">
+                <template v-slot="scope">
+                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
+                    {{ tag }}
+                  </el-tag>
+                  <el-input style="height: 30px" class="input-new-tag" size="small" v-if="inputVisible" v-model="inputValue" @key.enter.native="addVals" @blur="addVals"/>
+                  <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ New Tag</el-button>
+                </template>
+              </el-table-column>
               <el-table-column type="index" label="#"/>
               <el-table-column label="参数名称" prop="attrName"/>
               <el-table-column label="操作">
                 <template v-slot="scope">
                   <el-button type="warning" icon="el-icon-edit" round @click="edit(scope.row)">编辑</el-button>
-                  <el-button type="danger" icon="el-icon-delete" round>删除</el-button>
+                  <el-button type="danger" icon="el-icon-delete" round @click="removeAttribute(scope.row)">删除</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -103,7 +119,9 @@ export default {
         attrName: [
           { required: true, message: '请输参数名', trigger: 'blur' }
         ]
-      }
+      },
+      inputVisible: false,
+      inputValue: ''
     }
   },
   methods: {
@@ -139,8 +157,18 @@ export default {
       if (response.status === 200) {
         this.loading = false
         if (this.activeName === 'many') {
+          response.data.forEach(attr => {
+            if (attr.attrVals) {
+              attr.vals = attr.attrVals.split(' ')
+            }
+          })
           this.dynamicData = response.data
         } else {
+          response.data.forEach(attr => {
+            if (attr.attrVals) {
+              attr.vals = attr.attrVals.split(' ')
+            }
+          })
           this.staticData = response.data
         }
       }
@@ -193,6 +221,26 @@ export default {
           this.enableEditDialog = false
         }
       })
+    },
+    async removeAttribute (attr) {
+      const confirm = await this.$confirm('是否永久删除该属性?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).catch(err => err)
+      if (confirm === 'confirm') {
+        const { data: response } = await this.$http.delete('goods/removeAttr/' + attr.attrId)
+        if (response.status === 200) {
+          this.getGoodsAttribute()
+          this.$message.success('删除成功')
+        } else {
+          this.$message.error('删除失败')
+        }
+      } else {
+        this.$message.info('删除取消')
+      }
+    },
+    addVals () {
+      this.inputVisible = false
     }
   },
   created () {
@@ -224,5 +272,25 @@ export default {
     .el-cascader {
       width: 12%;
     }
+  }
+
+  .el-tag {
+    margin-right: 20px;
+    height: 32px;
+  }
+
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+    height: 30px;
   }
 </style>
