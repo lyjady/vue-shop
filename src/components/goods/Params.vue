@@ -20,8 +20,8 @@
                   <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
                     {{ tag }}
                   </el-tag>
-                  <el-input style="height: 30px" class="input-new-tag" size="small" v-if="inputVisible" v-model="inputValue" @key.enter.native="addVals" @blur="addVals"/>
-                  <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ New Tag</el-button>
+                  <el-input style="height: 30px" class="input-new-tag" ref="saveTagInput" size="small" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" @keypress.enter.native="addVals(scope.row)" @blur="addVals(scope.row)"/>
+                  <el-button class="button-new-tag" v-else size="small" @click="showTagInput(scope.row)">+ New Tag</el-button>
                 </template>
               </el-table-column>
               <el-table-column type="index" label="#"/>
@@ -42,8 +42,8 @@
                   <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
                     {{ tag }}
                   </el-tag>
-                  <el-input style="height: 30px" class="input-new-tag" size="small" v-if="inputVisible" v-model="inputValue" @key.enter.native="addVals" @blur="addVals"/>
-                  <el-button class="button-new-tag" v-else size="small" @click="inputVisible = true">+ New Tag</el-button>
+                  <el-input style="height: 30px" class="input-new-tag" ref="saveTagInput" size="small" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" @keypress.enter.native="addVals(scope.row)" @blur="addVals(scope.row)"/>
+                  <el-button class="button-new-tag" v-else size="small" @click="showTagInput(scope.row)">+ New Tag</el-button>
                 </template>
               </el-table-column>
               <el-table-column type="index" label="#"/>
@@ -119,9 +119,7 @@ export default {
         attrName: [
           { required: true, message: '请输参数名', trigger: 'blur' }
         ]
-      },
-      inputVisible: false,
-      inputValue: ''
+      }
     }
   },
   methods: {
@@ -158,6 +156,8 @@ export default {
         this.loading = false
         if (this.activeName === 'many') {
           response.data.forEach(attr => {
+            attr.inputVisible = false
+            attr.inputValue = ''
             if (attr.attrVals) {
               attr.vals = attr.attrVals.split(' ')
             }
@@ -168,6 +168,8 @@ export default {
             if (attr.attrVals) {
               attr.vals = attr.attrVals.split(' ')
             }
+            attr.inputVisible = false
+            attr.inputValue = ''
           })
           this.staticData = response.data
         }
@@ -239,8 +241,32 @@ export default {
         this.$message.info('删除取消')
       }
     },
-    addVals () {
-      this.inputVisible = false
+    async addVals (row) {
+      if (row.inputValue.trim().length === 0) {
+        row.inputValue = ''
+        row.inputVisible = false
+        return
+      }
+      row.vals.push(row.inputValue)
+      row.attrVals += ' ' + row.inputValue
+      let attribute = {
+        attrId: row.attrId,
+        attrVals: row.attrVals
+      }
+      const { data: response } = await this.$http.post('goods/addValue', attribute)
+      if (response.status === 200) {
+        this.$message.success('添加成功')
+      } else {
+        this.$message.error('添加失败')
+      }
+      row.inputValue = ''
+      row.inputVisible = false
+    },
+    showTagInput (row) {
+      row.inputVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
     }
   },
   created () {
@@ -277,6 +303,7 @@ export default {
   .el-tag {
     margin-right: 20px;
     height: 32px;
+    margin-bottom: 20px;
   }
 
   .button-new-tag {
@@ -290,7 +317,7 @@ export default {
   .input-new-tag {
     width: 90px;
     margin-left: 10px;
-    vertical-align: bottom;
+    /*vertical-align: bottom;*/
     height: 30px;
   }
 </style>
