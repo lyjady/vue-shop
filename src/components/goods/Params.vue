@@ -17,7 +17,7 @@
             <el-table :data="dynamicData" border stripe v-loading="loading">
               <el-table-column type="expand">
                 <template v-slot="scope">
-                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
+                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable @close="handleClose(index, scope.row)">
                     {{ tag }}
                   </el-tag>
                   <el-input style="height: 30px" class="input-new-tag" ref="saveTagInput" size="small" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" @keypress.enter.native="addVals(scope.row)" @blur="addVals(scope.row)"/>
@@ -39,7 +39,7 @@
             <el-table :data="staticData" border stripe v-loading="loading">
               <el-table-column type="expand">
                 <template v-slot="scope">
-                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable>
+                  <el-tag type="primary" v-for="(tag, index) in scope.row.vals" :key="index" closable @close="handleClose(index, scope.row)">
                     {{ tag }}
                   </el-tag>
                   <el-input style="height: 30px" class="input-new-tag" ref="saveTagInput" size="small" v-if="scope.row.inputVisible" v-model="scope.row.inputValue" @keypress.enter.native="addVals(scope.row)" @blur="addVals(scope.row)"/>
@@ -247,6 +247,9 @@ export default {
         row.inputVisible = false
         return
       }
+      if (!row.vals) {
+        row.vals = []
+      }
       row.vals.push(row.inputValue)
       row.attrVals += ' ' + row.inputValue
       let attribute = {
@@ -267,6 +270,20 @@ export default {
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus()
       })
+    },
+    async handleClose (index, row) {
+      row.vals.splice(index, 1)
+      row.attrVals = row.vals.join(' ')
+      let attribute = {
+        attrId: row.attrId,
+        attrVals: row.attrVals
+      }
+      const { data: response } = await this.$http.post('goods/addValue', attribute)
+      if (response.status === 200) {
+        this.$message.success('删除成功')
+      } else {
+        this.$message.error('删除失败')
+      }
     }
   },
   created () {
