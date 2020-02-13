@@ -17,7 +17,7 @@
           <el-step title="完成" />
         </el-steps>
         <el-form :model="addGoods" :rules="addGoodsRule" ref="addGoodsRef" label-position="top">
-          <el-tabs tab-position="left" v-model="activeIndex">
+          <el-tabs tab-position="left" v-model="activeIndex" :before-leave="checkLeave" @tab-click="tabToggle">
             <el-tab-pane label="基本信息" :name="'0'">
               <el-form-item label="商品名称" prop="goodsName">
                 <el-input v-model="addGoods.goodsName"/>
@@ -35,7 +35,13 @@
                 <el-cascader :props="cateProps" clearable separator=" > " :options="cateList" v-model="selectedCateKey" @change="handleSelectCateKey"/>
               </el-form-item>
             </el-tab-pane>
-            <el-tab-pane label="商品参数" :name="'1'">商品参数</el-tab-pane>
+            <el-tab-pane label="商品参数" :name="'1'">
+              <el-form-item :label="attr.attrName" v-for="attr in attrList" :key="attr.attrId">
+                <el-checkbox-group v-model="attr.vals">
+                  <el-checkbox :label="val" v-for="(val, index) in attr.vals" :key="index" border/>
+                </el-checkbox-group>
+              </el-form-item>
+            </el-tab-pane>
             <el-tab-pane label="商品属性" :name="'2'">商品属性</el-tab-pane>
             <el-tab-pane label="商品图片" :name="'3'">商品图片</el-tab-pane>
             <el-tab-pane label="商品内容" :name="'4'">
@@ -84,7 +90,8 @@ export default {
         label: 'catName',
         children: 'children',
         expandTrigger: 'hover'
-      }
+      },
+      attrList: []
     }
   },
   methods: {
@@ -106,6 +113,27 @@ export default {
     },
     handleSelectCateKey () {
       this.addGoods.catId = this.selectedCateKey[2]
+    },
+    checkLeave (newActive, oldActive) {
+      if (newActive === '1' && oldActive === '0') {
+        if (this.selectedCateKey.length !== 3) {
+          this.$message.error('请选择三级分类')
+          return false
+        }
+      }
+    },
+    async tabToggle (tab) {
+      if (tab.index === '1' && this.selectedCateKey.length === 3) {
+        const { data: response } = await this.$http.get('goods/findGoodsAttribute/' + this.selectedCateKey[2], { params: { type: 'many' } })
+        if (response.status === 200) {
+          this.attrList = response.data
+          this.attrList.forEach(attr => {
+            if (attr.attrVals.trim().length !== 0) {
+              attr.vals = attr.attrVals.split(' ')
+            }
+          })
+        }
+      }
     }
   },
   created () {
@@ -124,5 +152,9 @@ export default {
 
 .el-step__title {
   font-size: 12px;
+}
+
+.el-checkbox {
+  margin: 0 10px 0 0 !important;
 }
 </style>
