@@ -42,8 +42,19 @@
                 </el-checkbox-group>
               </el-form-item>
             </el-tab-pane>
-            <el-tab-pane label="商品属性" :name="'2'">商品属性</el-tab-pane>
-            <el-tab-pane label="商品图片" :name="'3'">商品图片</el-tab-pane>
+            <el-tab-pane label="商品属性" :name="'2'">
+              <el-form-item :label="attr.attrName" v-for="attr in staticAttr" :key="attr.attrId">
+                <el-input  v-model="attr.attrVals"/>
+              </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="商品图片" :name="'3'">
+              <el-upload list-type="picture-card" action="http://127.0.0.1:8081/shop/goods/upload" :before-upload="checkImage" :on-preview="previewImage" :on-success="uploadSuccess" :on-error="uploadError" :headers="headersObj">
+                <i class="el-icon-plus"></i>
+              </el-upload>
+              <el-dialog :visible.sync="imageDialog">
+                <img width="100%" :src="imageUrl" alt=""/>
+              </el-dialog>
+            </el-tab-pane>
             <el-tab-pane label="商品内容" :name="'4'">
               <el-button @click="activeIndex = '5'">添加</el-button>
             </el-tab-pane>
@@ -91,7 +102,13 @@ export default {
         children: 'children',
         expandTrigger: 'hover'
       },
-      attrList: []
+      attrList: [],
+      staticAttr: [],
+      headersObj: {
+        Authorization: window.sessionStorage.getItem('token')
+      },
+      imageDialog: false,
+      imageUrl: ''
     }
   },
   methods: {
@@ -115,7 +132,7 @@ export default {
       this.addGoods.catId = this.selectedCateKey[2]
     },
     checkLeave (newActive, oldActive) {
-      if (newActive === '1' && oldActive === '0') {
+      if (newActive !== '0') {
         if (this.selectedCateKey.length !== 3) {
           this.$message.error('请选择三级分类')
           return false
@@ -133,7 +150,28 @@ export default {
             }
           })
         }
+      } else if (tab.index === '2' && this.selectedCateKey.length === 3) {
+        const { data: response } = await this.$http.get('goods/findGoodsAttribute/' + this.selectedCateKey[2], { params: { type: 'only' } })
+        if (response.status === 200) {
+          this.staticAttr = response.data
+        }
       }
+    },
+    checkImage (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        this.$message.warning('请上传小于5Mb的图片')
+        return false
+      }
+    },
+    previewImage (file) {
+      this.imageUrl = file.url
+      this.imageDialog = true
+    },
+    uploadSuccess () {
+      this.$message.success('上传成功')
+    },
+    uploadError () {
+      this.$message.error('上传失败')
     }
   },
   created () {

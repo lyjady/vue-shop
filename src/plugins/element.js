@@ -41,7 +41,8 @@ import {
   Step,
   Steps,
   CheckboxGroup,
-  Checkbox
+  Checkbox,
+  Upload
 // eslint-disable-next-line import/no-duplicates
 } from 'element-ui'
 
@@ -80,5 +81,6 @@ Vue.use(Step)
 Vue.use(Steps)
 Vue.use(CheckboxGroup)
 Vue.use(Checkbox)
+Vue.use(Upload)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
