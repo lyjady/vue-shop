@@ -48,7 +48,8 @@
               </el-form-item>
             </el-tab-pane>
             <el-tab-pane label="商品图片" :name="'3'">
-              <el-upload list-type="picture-card" action="http://127.0.0.1:8081/shop/goods/upload" :before-upload="checkImage" :on-preview="previewImage" :on-success="uploadSuccess" :on-error="uploadError" :headers="headersObj">
+              <el-upload list-type="picture-card" action="http://127.0.0.1:8081/shop/goods/upload"
+                         :before-upload="checkImage" :on-preview="previewImage" :on-success="uploadSuccess" :on-error="uploadError" :headers="headersObj" :on-remove="removeImage">
                 <i class="el-icon-plus"></i>
               </el-upload>
               <el-dialog :visible.sync="imageDialog">
@@ -56,7 +57,8 @@
               </el-dialog>
             </el-tab-pane>
             <el-tab-pane label="商品内容" :name="'4'">
-              <el-button @click="activeIndex = '5'">添加</el-button>
+              <quill-editor v-model="addGoods.goodsIntroduce"/>
+              <el-button @click="activeIndex = '5'" type="primary">添加</el-button>
             </el-tab-pane>
           </el-tabs>
         </el-form>
@@ -75,7 +77,9 @@ export default {
         goodsPrice: 0,
         goodsWeight: 0,
         goodsNumber: 0,
-        catId: 0
+        catId: 0,
+        goodsPics: [],
+        goodsIntroduce: ''
       },
       addGoodsRule: {
         goodsName: [
@@ -167,11 +171,17 @@ export default {
       this.imageUrl = file.url
       this.imageDialog = true
     },
-    uploadSuccess () {
+    uploadSuccess (response) {
       this.$message.success('上传成功')
+      this.addGoods.goodsPics.push(response.data)
     },
     uploadError () {
       this.$message.error('上传失败')
+    },
+    removeImage (file) {
+      let removeImageName = file.name
+      let index = this.addGoods.goodsPics.findIndex(image => removeImageName === image.substring(image.lastIndexOf('/') + 1))
+      this.addGoods.goodsPics.splice(index, 1)
     }
   },
   created () {
@@ -194,5 +204,10 @@ export default {
 
 .el-checkbox {
   margin: 0 10px 0 0 !important;
+}
+
+.el-button {
+  margin: 10px 0;
+  width: 150px;
 }
 </style>

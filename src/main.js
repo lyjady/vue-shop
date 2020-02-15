@@ -7,6 +7,11 @@ import './assets/fonts/iconfont.css'
 import axios from 'axios'
 import 'element-ui/lib/theme-chalk/index.css'
 import ZkTable from 'vue-table-with-tree-grid'
+import VueQuillEditor from 'vue-quill-editor/src'
+
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 
 Vue.config.productionTip = false
 
@@ -18,6 +23,7 @@ axios.interceptors.request.use(config => {
 })
 
 Vue.component(ZkTable.name, ZkTable)
+Vue.use(VueQuillEditor)
 
 Vue.filter('dateFormat', function (mill) {
   const date = new Date(mill)
