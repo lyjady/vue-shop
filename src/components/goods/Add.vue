@@ -31,7 +31,7 @@
               <el-form-item label="商品数量" prop="goodsNumber">
                 <el-input v-model="addGoods.goodsNumber" type="number"/>
               </el-form-item>
-              <el-form-item label="商品分类" prop="cateId">
+              <el-form-item label="商品分类">
                 <el-cascader :props="cateProps" clearable separator=" > " :options="cateList" v-model="selectedCateKey" @change="handleSelectCateKey"/>
               </el-form-item>
             </el-tab-pane>
@@ -58,7 +58,7 @@
             </el-tab-pane>
             <el-tab-pane label="商品内容" :name="'4'">
               <quill-editor v-model="addGoods.goodsIntroduce"/>
-              <el-button @click="activeIndex = '5'" type="primary">添加</el-button>
+              <el-button @click="add" type="primary">添加</el-button>
             </el-tab-pane>
           </el-tabs>
         </el-form>
@@ -77,9 +77,10 @@ export default {
         goodsPrice: 0,
         goodsWeight: 0,
         goodsNumber: 0,
-        catId: 0,
+        catId: '',
         goodsPics: [],
-        goodsIntroduce: ''
+        goodsIntroduce: '',
+        goodsAttr: []
       },
       addGoodsRule: {
         goodsName: [
@@ -93,9 +94,6 @@ export default {
         ],
         goodsNumber: [
           { required: true, message: '请输入商品数量', trigger: 'blur' }
-        ],
-        cateId: [
-          { required: true, message: '请选择商品类型', trigger: 'blur' }
         ]
       },
       cateList: [],
@@ -182,6 +180,27 @@ export default {
       let removeImageName = file.name
       let index = this.addGoods.goodsPics.findIndex(image => removeImageName === image.substring(image.lastIndexOf('/') + 1))
       this.addGoods.goodsPics.splice(index, 1)
+    },
+    add () {
+      this.$refs.addGoodsRef.validate(valid => {
+        if (valid) {
+          this.attrList.forEach(item => {
+            let obj = { attrId: item.attrId, attrVals: item.attrVals }
+            this.addGoods.goodsAttr.push(obj)
+          })
+          this.staticAttr.forEach(item => {
+            let obj = { attrId: item.attrId, attrVals: item.attrVals }
+            this.addGoods.goodsAttr.push(obj)
+          })
+          this.addGoods.catId = this.selectedCateKey.join(',')
+          console.log(this.addGoods)
+          this.activeIndex = '6'
+          this.$router.push('/goods')
+          this.$message.success('添加成功')
+        } else {
+          this.$message.warning('请填写商品基本信息')
+        }
+      })
     }
   },
   created () {
