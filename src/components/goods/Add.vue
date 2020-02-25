@@ -193,7 +193,6 @@ export default {
             this.addGoods.goodsAttr.push(obj)
           })
           this.addGoods.catId = this.selectedCateKey.join(',')
-          console.log(this.addGoods)
           this.activeIndex = '6'
           this.$router.push('/goods')
           this.$message.success('添加成功')

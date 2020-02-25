@@ -213,7 +213,6 @@ export default {
       this.$refs.editAttributeRef.validate(async valid => {
         if (valid) {
           const { data: response } = await this.$http.post('goods/editAttribute', this.editAttribute)
-          console.log(response)
           if (response.status === 200) {
             this.$message.success('更新成功')
             this.getGoodsAttribute()
